@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Saluhan catering inventory
 
-## Getting Started
+A local inventory prototype for a catering owner or manager. Includes ingredients and consumables, batch expiry and costs, recipes, event reservations and partial usage, buying suggestions, reports, and conversational inventory entry.
 
-First, run the development server:
+## Run locally
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```sh
+bun install
+bun run dev -- --hostname 127.0.0.1
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://127.0.0.1:3000. Sample records load automatically. Changes persist in this browser. Settings > Reset demo restores the sample records after confirmation.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Enable Quick log
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Copy `.env.example` to `.env.local`, set `OPENAI_API_KEY` locally, and restart the server. `OPENAI_MODEL` defaults to `gpt-5-mini`. Keep the key on the server and out of source control.
 
-## Learn More
+Quick log sends the message, active conversation, and inventory catalog to OpenAI. It returns a draft for clarification and review. Stock changes only after Save entry. Manual entry works without an API key. Missing configuration or service failures show an error and preserve the draft.
 
-To learn more about Next.js, take a look at the following resources:
+Try these with the sample catalog, then answer requests for supplier, expiry, price basis, event, or batch:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `Received 2 sacks of rice at PHP 1,250 each.`
+- `Nagamit 3 kilo na chicken para sa Santos wedding.`
+- `Nasayang 2 liters of milk, panis na.`
+- `May 8 kg na rice na lang.`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The endpoint accepts localhost requests only. Before public hosting, add authentication, shared storage with access controls, and durable usage limits. This prototype has no real accounts or cross-device synchronization.
 
-## Deploy on Vercel
+## Verification
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```sh
+bun test
+bun run typecheck
+bun run lint
+bun run build
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Tests cover stock calculations, reservation priority, expiry, counts, corrections, catalog changes, structured draft validation, missing configuration, origin checks, and mocked OpenAI transport. Mocked responses do not establish real English or Taglish interpretation accuracy.
+
+For a live evaluation, configure a key and test the examples above plus ambiguous item names, missing costs, multiple items, mixed actions, and changed quantities. Verify that unclear requests ask a question, edits do not change stock, and saving changes it exactly once. Compare movement history and event usage after each save. Live AI evaluation remains pending until a key is configured.
+
+## Implementation notes
+
+- Next.js App Router, React, TypeScript, Tailwind, shadcn/ui and Lucide React.
+- React Hook Form and Zod validate forms; TanStack Table provides tables.
+- `lib/inventory.ts` owns stock mutations and calculations shared by manual and chat entry.
+- `components/store.tsx` validates versioned browser state and reports storage failures.
+- `app/api/quick-log/route.ts` uses OpenAI Responses structured outputs. It cannot mutate stock.
+- Base units are grams, milliliters, and pieces. Packs are item-specific. Recipe amounts are preserved when a referenced pack changes.
+- Confirmed events snapshot their requirements. Recipe changes can be explicitly refreshed. Usage consumes stock immediately; completion releases unused reservations.
+- Spreadsheet import is a labeled sample preview only.
+
+The agreed scope and remaining verification are recorded in [the implementation plan](docs/plans/catering-inventory-implementation.md).

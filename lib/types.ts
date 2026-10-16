@@ -1,0 +1,10 @@
+export type Unit = 'g' | 'mL' | 'pcs';
+export type Item = { id: string; name: string; category: string; kind: 'ingredient' | 'consumable'; unit: Unit; threshold: number; requiresExpiry: boolean; packs: { name: string; quantity: number }[]; archived: boolean };
+export type Batch = { id: string; itemId: string; received: string; expiry: string; quantity: number; cost: number; supplierId: string };
+export type Movement = { id: string; entryId: string; itemId: string; batchId: string; action: 'receive' | 'use' | 'waste' | 'count' | 'correction'; quantity: number; cost: number; date: string; reason: string; eventId?: string; corrects?: string };
+export type Recipe = { id: string; name: string; servings: number; ingredients: { itemId: string; quantity: number; unit: string }[] };
+export type Supply = { itemId: string; quantity: number; perGuest: boolean };
+export type CateringEvent = { id: string; name: string; date: string; prepDate: string; guests: number; status: 'Draft' | 'Confirmed' | 'Completed' | 'Canceled'; dishes: { recipeId: string; servings: number }[]; supplies: Supply[]; confirmedAt?: string; snapshot?: Record<string, number>; estimatedCost?: number };
+export type State = { version: 1; revision: number; settings: { name: string; logo: string; categories: string[]; expiryDays: number }; items: Item[]; suppliers: { id: string; name: string }[]; batches: Batch[]; movements: Movement[]; recipes: Recipe[]; events: CateringEvent[]; templates: { id: string; name: string; supplies: Supply[] }[] };
+export type Entry = { id: string; action: 'receive' | 'use' | 'waste' | 'count'; date: string; eventId?: string; supplierId?: string; reason: string; lines: { itemId: string; quantity: number; unit: string; batchId?: string; expiry?: string; totalCost?: number }[] };
+export type Allocation = { batchId: string; quantity: number };
